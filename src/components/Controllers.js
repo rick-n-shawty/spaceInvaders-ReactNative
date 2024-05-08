@@ -1,19 +1,26 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { Direction } from "../utils/direction";
+import LongPressButton from "./LongPressButton"; 
 const ICON_SIZE = 70
-export default function Controllers({moveShip}){
+export default function Controllers({moveShip, shipState, shoot}){
     return (
         <View style={styles.container}>
             <View style={styles.leftRight}>
-                <TouchableOpacity onFocus={() => moveShip(Direction.LEFT)}>
-                    <AntDesign name="caretleft" size={ICON_SIZE}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => moveShip(Direction.RIGHT)}>
-                    <AntDesign name="caretright" size={ICON_SIZE}/>
-                </TouchableOpacity>
+                <LongPressButton 
+                iconName = {'caretleft'} 
+                iconSize={ICON_SIZE} 
+                dir={Direction.LEFT}
+                shipState={shipState}
+                moveShip={moveShip}/>
+                <LongPressButton 
+                iconName = {'caretright'} 
+                iconSize={ICON_SIZE}
+                dir={Direction.RIGHT}
+                shipState={shipState}
+                moveShip={moveShip}/>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={shoot}>
                 <MaterialIcons name="local-fire-department" size={ICON_SIZE}/>
             </TouchableOpacity>
         </View>

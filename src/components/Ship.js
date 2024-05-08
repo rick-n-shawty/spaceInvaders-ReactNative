@@ -1,9 +1,9 @@
 import * as React from "react"; 
 import { View, StyleSheet } from "react-native";
-export default function Ship({pos}){
-    const {x,y} = pos; 
+export default function Ship({shipData}){
+    const {x,y,size} = shipData; 
     return(
-        <View style={[styles.container, {left: x, top: y}]}>
+        <View style={[styles.container, {left: x, top: y, width: size, height: size}]}>
 
         </View>
     )
@@ -11,8 +11,6 @@ export default function Ship({pos}){
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'green',
-        width: 30,
-        height: 30,
-        position: 'relative'
+        position: "absolute"
     }
 })
