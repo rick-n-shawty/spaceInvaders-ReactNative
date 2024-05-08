@@ -1,2 +1,3 @@
 ### NOTES 
-- position the ship properly on the grid
+- make alien spaceships
+- add some shields as well

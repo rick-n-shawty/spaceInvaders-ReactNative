@@ -1,6 +1,6 @@
 import * as React from "react"; 
 import { useState, useEffect } from "react";
-import { View, StyleSheet, SafeAreaView, Dimensions } from "react-native";
+import { StyleSheet, SafeAreaView, Dimensions } from "react-native";
 import Controllers from "./Controllers";
 import Canvas from "./Canvas";
 import { Direction } from "../utils/direction"; 
@@ -33,17 +33,36 @@ export default function Game(){
         }
     }
     const shoot = () => {
-        console.log('PEW PEW PEW')
         setBullets(prev => {
-            const bullet = {x: ship.x + (ship.size / 2), y: ship.y};
-            return [bullet, ...prev]
+            const bullet = {x: ship.x + (ship.size / 2), y: ship.y - 20};
+            return [...prev, bullet]
         });
     }
+    const moveBullets = () => {
+        if(bullets.length < 1) return;
+        const temp = [];
+        for(let i = 0; i < bullets.length; i++){
+            const bullet = bullets[i] 
+            bullet.y -= 2; 
+            if(bullet.y > 0){
+                temp.push(bullet);
+            }
+        }
+        setBullets(temp);
+    };
+    useEffect(() => {
+        let interval_id;
+        if(bullets.length > 0){
+            interval_id = setInterval(moveBullets, 10); 
+        }
+        return () => clearInterval(interval_id); 
+    }, [bullets])
     return(
         <SafeAreaView style={styles.container}>
             <Canvas 
             ship={ship}
             bullets={bullets}
+            moveBullets={moveBullets}
             size={CANVAS_SIZE}/>
             <Controllers shoot={shoot} moveShip={moveShip} shipState={ship}/>
         </SafeAreaView>
