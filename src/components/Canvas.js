@@ -1,23 +1,29 @@
 import * as React from "react"; 
 import Ship from "./Ship";
-import { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
+import { constants } from "../globals/constants";
 import Bullet from "./Bullet";
-export default function Canvas({size, ship, bullets}){
-    const renderBullets = () => {
-        const bulletArray = []
-        for(let i = 0; i < bullets.length; i++){
-            const bullet = bullets[i]; 
-            bulletArray[i] = <Bullet key={i} x={bullet.x} y={bullet.y}/>
+import Alien from "./Alien";
+const { alienSize } = constants;
+export default function Canvas({canvasHeight, ship, bullets, aliens}){
+    const renderAliens = () => {
+        const arr =[]
+        for(let i = 0; i < aliens.length; i++){
+            for(let j = 0; j < aliens[i].length; j++){
+                const alien = aliens[i][j]; 
+                const comp = <Alien key={`${i},${j}`} x={alien.x} y={alien.y} size={alienSize}/>
+                arr.push(comp);
+            }
         }
-        return bulletArray; 
+        return arr; 
     }
-    
-
     return (
-        <View style={[styles.container, {height: size.height}]}>
+        <View style={[styles.container, {height: canvasHeight}]}>
             <Ship shipData={ship}/>
-            {renderBullets()}
+            {bullets.map((bullet, index) => {
+                return <Bullet key={index} x={bullet.x} y={bullet.y} color={bullet.color}/>
+            })}
+            {renderAliens()}
         </View>
     );
 }

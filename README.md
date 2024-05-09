@@ -1,3 +1,4 @@
 ### NOTES 
-- make alien spaceships
-- add some shields as well
+- space partition for collision detection
+- make spaceships move
+- add some shields
