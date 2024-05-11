@@ -6,6 +6,8 @@ import Canvas from "./Canvas";
 import { constants } from "../globals/constants";
 import { colors } from "../globals/colors";
 import { Direction } from "../utils/direction";  
+import { ShipClass } from "../Classes/ShipClass";
+import { BulletClass } from "../Classes/BulletClass";
 const screenWidth = Dimensions.get('window').width; 
 const { 
     SHIP_SPEED, 
@@ -19,36 +21,39 @@ const {
     initialAlienY,
     attackPeriod,
     agressionLevel,
-    cellSize
+    cellSize,
+    SHIP_SIZE
 } = constants;
 export default function Game(){ 
-    const [grid, setGrid] = useState(new Map()); 
-    const [ship, setShip] = useState({x: 100, y: SHIP_Y, size: 30});
+    const [myMap, setMyMap] = useState(new Map([
+        ['key1', {x: 10, y: 200}],
+        ['key2', 'value2'],
+        ['key3', 'value3']
+    ]))
+    // const [grid, setGrid] = useState([
+    //     {xMin: 10, xMax: 100, yMin: 10, yMax: 100, ships: []}
+    // ])
+    const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE));
     const [bullets, setBullets] = useState([]); 
     const [aliens, setAliens] = useState([]); 
 
     const moveShip = (dir) => {
-        let temp = {}
-        console.log(grid)
-        for(let key of grid.keys()){
-            console.log(key);
-        }
+        let temp;
         if(dir === Direction.LEFT){
-            if(ship.x - SHIP_BOUNDS < 0) return;
+            if(ship.getX() - SHIP_BOUNDS < 0) return;
             setShip(prev => {
-                temp = {...prev}; 
-                temp.x -= SHIP_SPEED; 
+                temp = new ShipClass(prev.getX() - SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE);
                 return temp; 
             })
         }else if(dir === Direction.RIGHT){
-            if(ship.x + ship.size + SHIP_BOUNDS > screenWidth) return;
+            if(ship.getX() + ship.getWidth() + SHIP_BOUNDS > screenWidth) return;
             setShip(prev => {
-                temp = {...prev}; 
-                temp.x += SHIP_SPEED; 
+                temp = new ShipClass(prev.getX() + SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE);
                 return temp; 
             })
         }
     }
+    
     const shoot = (shooter,isAlien) => {
         const bullet = {x: shooter.x + (shooter.size / 2), y: shooter.y}; 
         if(isAlien){
@@ -75,22 +80,22 @@ export default function Game(){
             }
         }
         setBullets(temp);
-        // console.log(grid)
     };
-    const generateAliens = () => {
+    const initializeGame = () => { 
+        // Generate alien spaceships
         const alienArray = [];
         for(let i = 0; i < alienRows; i++){
             const temp = [];
             for(let j = 0; j < alienCol; j++){
                 const alienX = SHIP_BOUNDS + (alienSize + spaceBetweenAliens) * j; 
                 const alienY = initialAlienY + (alienSize + spaceBetweenAliens) * i;
-                const alienObj = {x: alienX, y: alienY, size: alienSize}
+                const alienObj = new ShipClass(alienX, alienY, alienSize, alienSize);
                 temp.push(alienObj);
-                const cell = Math.floor(alienX / cellSize) + ',' + Math.floor(alienY / cellSize);           
             }
             alienArray.push(temp);
         }
-        setAliens(alienArray); 
+        setAliens(alienArray);  
+        //-------------------------
     }
     const alienAttack = () => {
         for(let i = 0; i  < agressionLevel; i++){
@@ -118,7 +123,7 @@ export default function Game(){
     //     return () => clearInterval(shootingInterval);
     // }, [aliens])
     useEffect(() => {
-        generateAliens(); 
+        initializeGame();
     }, [])
     return(
         <SafeAreaView style={styles.container}>

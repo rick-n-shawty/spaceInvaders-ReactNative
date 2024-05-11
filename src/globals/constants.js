@@ -2,6 +2,7 @@ export const constants = {
     SHIP_BOUNDS: 10,
     SHIP_SPEED: 5,
     SHIP_Y: 500,  
+    SHIP_SIZE: 30,
     alienRows: 5, 
     alienCol: 5,
     canvasHeight: 550,

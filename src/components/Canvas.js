@@ -11,7 +11,7 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
         for(let i = 0; i < aliens.length; i++){
             for(let j = 0; j < aliens[i].length; j++){
                 const alien = aliens[i][j]; 
-                const comp = <Alien key={`${i},${j}`} x={alien.x} y={alien.y} size={alienSize}/>
+                const comp = <Alien key={`${i},${j}`} alien={alien}/>
                 arr.push(comp);
             }
         }
@@ -19,7 +19,7 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
     }
     return (
         <View style={[styles.container, {height: canvasHeight}]}>
-            <Ship shipData={ship}/>
+            <Ship ship={ship}/>
             {bullets.map((bullet, index) => {
                 return <Bullet key={index} x={bullet.x} y={bullet.y} color={bullet.color}/>
             })}
