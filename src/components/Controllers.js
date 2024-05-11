@@ -20,7 +20,7 @@ export default function Controllers({moveShip, shipState, shoot}){
                 shipState={shipState}
                 moveShip={moveShip}/>
             </View>
-            <TouchableOpacity onPress={() => shoot(shipState,false)}>
+            <TouchableOpacity onPress={() => shoot(shipState)}>
                 <MaterialIcons name="local-fire-department" size={ICON_SIZE}/>
             </TouchableOpacity>
         </View>

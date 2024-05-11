@@ -13,4 +13,7 @@ export class BulletClass{
     getPosition(){
         return {x: this.x, y: this.y}; 
     }
+    getSize(){
+        return {height: this.height, width: this.width}; 
+    }
 }

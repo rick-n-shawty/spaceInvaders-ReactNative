@@ -21,7 +21,7 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
         <View style={[styles.container, {height: canvasHeight}]}>
             <Ship ship={ship}/>
             {bullets.map((bullet, index) => {
-                return <Bullet key={index} x={bullet.x} y={bullet.y} color={bullet.color}/>
+                return <Bullet key={index} bullet={bullet}/>
             })}
             {renderAliens()}
         </View>

@@ -8,6 +8,8 @@ import { colors } from "../globals/colors";
 import { Direction } from "../utils/direction";  
 import { ShipClass } from "../Classes/ShipClass";
 import { BulletClass } from "../Classes/BulletClass";
+import Cell from "./Cell";
+import { checkOverlap } from "../utils/funcs";
 const screenWidth = Dimensions.get('window').width; 
 const { 
     SHIP_SPEED, 
@@ -22,61 +24,75 @@ const {
     attackPeriod,
     agressionLevel,
     cellSize,
-    SHIP_SIZE
-} = constants;
+    SHIP_SIZE,
+    bulletHeight,
+    bulletSpeed,
+    bulletWidth
+} = constants; 
+const cellHeight = Math.floor(canvasHeight / cellSize) + 5; 
+const cellWidth = Math.floor(screenWidth / cellSize); 
 export default function Game(){ 
-    const [myMap, setMyMap] = useState(new Map([
-        ['key1', {x: 10, y: 200}],
-        ['key2', 'value2'],
-        ['key3', 'value3']
-    ]))
-    // const [grid, setGrid] = useState([
-    //     {xMin: 10, xMax: 100, yMin: 10, yMax: 100, ships: []}
-    // ])
-    const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE));
+    const [grid, setGrid] = useState([]);
+    const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
     const [bullets, setBullets] = useState([]); 
     const [aliens, setAliens] = useState([]); 
+    const checkCollision = () => {
 
+    };
     const moveShip = (dir) => {
         let temp;
         if(dir === Direction.LEFT){
             if(ship.getX() - SHIP_BOUNDS < 0) return;
             setShip(prev => {
-                temp = new ShipClass(prev.getX() - SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE);
+                temp = new ShipClass(prev.getX() - SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE, false);
                 return temp; 
             })
         }else if(dir === Direction.RIGHT){
             if(ship.getX() + ship.getWidth() + SHIP_BOUNDS > screenWidth) return;
             setShip(prev => {
-                temp = new ShipClass(prev.getX() + SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE);
+                temp = new ShipClass(prev.getX() + SHIP_SPEED, prev.y, SHIP_SIZE, SHIP_SIZE, false);
                 return temp; 
             })
+        } 
+
+
+        // Local in each cell the ship is located adn highlight it
+        const rowIndex = Math.round((ship.y + ship.height) / cellHeight); // !!! IMPORTANT !!!
+        const row = grid[rowIndex]; 
+        for(let i = 0; i < row.length; i++){
+            const cell = row[i];
+            cell.isLit = checkOverlap(cell,ship);  
+            row[i] = cell;         
         }
+        setGrid(prev => {
+            temp = [...prev]; 
+            temp[rowIndex] = row;
+            return temp; 
+        })
+        // -------------------------------------
     }
     
-    const shoot = (shooter,isAlien) => {
-        const bullet = {x: shooter.x + (shooter.size / 2), y: shooter.y}; 
-        if(isAlien){
-            bullet['dir'] = 1; 
-            bullet.y += shooter.size;
-            bullet['color'] = colors.alienBulletColor; 
-        }else{
-            bullet['dir'] = -1; 
-            bullet.y -= shooter.size;
-            bullet['color'] = colors.green;
+    const shoot = (shooter) => {
+        if(!(shooter instanceof ShipClass)){
+            console.log('SHOOTER MUST BE THE INSTANCE OF SHIP CLASS!')
+            return; 
         }
+        const x = shooter.getX() + Math.floor(shooter.getWidth() / 2); 
+        const y = shooter.getY(); 
+        const dir = shooter.isAlien ? 1 : -1; 
+        const bullet = new BulletClass(x,y,bulletWidth,bulletHeight,dir,bulletSpeed);
         setBullets(prev => {
-            return [...prev, bullet]
+            return [...prev, bullet]; 
         });
-    }
+    };
     const moveBullets = () => {
         if(bullets.length < 1) return;
-        const temp = [];
+        const temp = []; 
         for(let i = 0; i < bullets.length; i++){
-            const bullet = bullets[i] 
-            bullet.y += 1 * bullet['dir'];
-            if(bullet.y > 0 || bullet.y > canvasHeight){
-                temp.push(bullet);
+            const bullet = bullets[i]; 
+            bullet.move(); 
+            if(bullet.y >= 0){
+                temp.push(bullet); 
             }
         }
         setBullets(temp);
@@ -89,13 +105,36 @@ export default function Game(){
             for(let j = 0; j < alienCol; j++){
                 const alienX = SHIP_BOUNDS + (alienSize + spaceBetweenAliens) * j; 
                 const alienY = initialAlienY + (alienSize + spaceBetweenAliens) * i;
-                const alienObj = new ShipClass(alienX, alienY, alienSize, alienSize);
+                const alienObj = new ShipClass(alienX, alienY, alienSize, alienSize, true);
                 temp.push(alienObj);
             }
             alienArray.push(temp);
         }
         setAliens(alienArray);  
-        //-------------------------
+        //------------------------- 
+
+
+        // Divide the grid 
+        const cells = [];
+        for(let row = 0; row < cellSize; row++){
+            const temp = [];
+            for(let col = 0; col < cellSize; col++){
+                const cellX = cellWidth * col ;
+                const cellY = cellHeight * row; 
+                const cellObj = {
+                    x: cellX, 
+                    y: cellY, 
+                    width: cellWidth, 
+                    height: cellHeight,
+                    isLit: false
+                };
+                temp.push(cellObj);
+            }
+            cells.push(temp); 
+        }
+        setGrid(cells);
+        //------------------------- 
+
     }
     const alienAttack = () => {
         for(let i = 0; i  < agressionLevel; i++){
@@ -115,18 +154,24 @@ export default function Game(){
             clearInterval(interval_id);
         }
     }, [bullets]) 
-    // useEffect(() => {
-    //     let shootingInterval; 
-    //     if(aliens.length > 0){
-    //         shootingInterval = setInterval(alienAttack, attackPeriod); 
-    //     }
-    //     return () => clearInterval(shootingInterval);
-    // }, [aliens])
     useEffect(() => {
         initializeGame();
     }, [])
+
+    const showCells = () => {
+        const comps = [];
+        for(let row = 0; row < grid.length; row++){
+            for(let col = 0; col < grid[row].length; col++){ 
+                const item = grid[row][col]; 
+                comps.push(<Cell key={`${row},${col}`} cell={item}/>);
+            }
+        }
+        return comps;
+    }
+
     return(
         <SafeAreaView style={styles.container}>
+            {showCells()}
             <Canvas 
             ship={ship}
             bullets={bullets}
