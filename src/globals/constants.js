@@ -16,7 +16,7 @@ export const constants = {
     CELL_HEIGHT: 10, 
     BULLET_WIDTH: 5,
     BULLET_HEIGHT: 20,
-    BULLET_SPEED: 1,
+    BULLET_SPEED: 4,
     ALIEN_SHIP_SPEED: 5,
     ALIENS_MOVE_STEPS: 25, // depends on the number of alien rows -> alienRows^2
 };

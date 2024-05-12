@@ -1,4 +1,3 @@
 ### NOTES 
-- space partition for collision detection
-- make spaceships move
+- collision detection
 - add some shields

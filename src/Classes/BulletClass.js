@@ -8,6 +8,18 @@ export class BulletClass{
         this.height = height; 
         this.dir = dir; 
     }
+    getY(){
+        return this.y;
+    }
+    getX(){
+        return this.x; 
+    }
+    getHeight(){
+        return this.height;
+    }
+    getWidth(){
+        return this.width;
+    }
     move(){
         this.y += BULLET_SPEED * this.dir; 
     }

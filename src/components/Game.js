@@ -39,9 +39,13 @@ export default function Game(){
     const [grid, setGrid] = useState([]);
     const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
     const [bullets, setBullets] = useState([]); 
-    const [aliens, setAliens] = useState([]); 
-    const checkCollision = () => {
+    const [aliens, setAliens] = useState([]);  
+    const [isGameOver, setGameOver] = useState(false); 
 
+
+
+    const checkCollision = () => {
+        
     };
     const moveShip = (dir) => {
         let temp;
@@ -58,8 +62,6 @@ export default function Game(){
                 return temp; 
             })
         } 
-
-
         // Local in each cell the ship is located adn highlight it
         const rowIndex = Math.round((ship.y + ship.height) / cellHeight); // !!! IMPORTANT !!!
         const row = grid[rowIndex]; 
@@ -92,15 +94,32 @@ export default function Game(){
     };
     const moveBullets = () => {
         if(bullets.length < 1) return;
-        const temp = []; 
+        const tempBullets = []; 
+        const tempGrid = [...grid]; 
         for(let i = 0; i < bullets.length; i++){
             const bullet = bullets[i]; 
             bullet.move(); 
-            if(bullet.y >= 0){
-                temp.push(bullet); 
+            if(bullet.y >= 0 || bullet.y <= CANVAS_HEIGHT){
+                tempBullets.push(bullet); 
             }
+
+            // collision detection test
+            const gridIndex = Math.round((bullet.getY() + bullet.getHeight()) / CANVAS_HEIGHT);
+            const gridRow = tempGrid[gridIndex]; 
+            if(gridIndex >= 0 && gridIndex < grid.length){
+                for(let j = 0; j < gridRow.length; j++){
+                    const cell = gridRow[j]; 
+                    cell.isLit = false;
+                    cell.isLit = checkOverlap(cell, bullet);
+                    gridRow[j] = cell; 
+                }
+                tempGrid[gridIndex] = gridRow; 
+            }
+            //
+
         }
-        setBullets(temp);
+        setBullets(tempBullets);
+        setGrid(tempGrid);
     };
     const initializeGame = () => { 
         // Generate alien spaceships
@@ -191,6 +210,8 @@ export default function Game(){
     useEffect(() => {
         initializeGame();
     }, []);
+
+    // movement of the bullets 
     useEffect(() => {
         let interval_id;
         if(bullets.length > 0){
@@ -199,8 +220,10 @@ export default function Game(){
         return () => {
             clearInterval(interval_id);
         }
-    }, [bullets]) 
-    useEffect(() => {
+    }, [bullets, grid]) 
+
+    // movement of alien spaceships 
+    useEffect(() => { 
         const interval_id = setInterval(moveAlienShips, 100); 
         return () => clearInterval(interval_id);
     }, [count, aliens, alienDir])
