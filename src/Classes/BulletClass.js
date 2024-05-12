@@ -1,6 +1,7 @@
+import { constants } from "../globals/constants";
+const { BULLET_SPEED } = constants;
 export class BulletClass{
-    constructor(x,y,width,height,dir,speed){
-        this.speed = speed; 
+    constructor(x,y,width,height,dir){
         this.x = x; 
         this.y = y; 
         this.width = width;
@@ -8,7 +9,7 @@ export class BulletClass{
         this.dir = dir; 
     }
     move(){
-        this.y += this.speed * this.dir; 
+        this.y += BULLET_SPEED * this.dir; 
     }
     getPosition(){
         return {x: this.x, y: this.y}; 

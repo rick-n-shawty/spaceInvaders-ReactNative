@@ -15,22 +15,23 @@ const {
     SHIP_SPEED, 
     SHIP_BOUNDS, 
     SHIP_Y, 
-    alienRows, 
-    alienCol, 
-    canvasHeight, 
-    alienSize,
-    spaceBetweenAliens,
-    initialAlienY,
-    attackPeriod,
-    agressionLevel,
-    cellSize,
+    ALIEN_ROWS, 
+    ALIEN_COL, 
+    CANVAS_HEIGHT, 
+    ALIEN_SIZE,
+    SPACE_BETWEEN_ALIENS,
+    INITIAL_ALIEN_Y,
+    ATTACK_PERIOD,
+    AGRESSION,
+    CELL_SIZE,
+    CELL_WIDTH,
+    CELL_HEIGHT,
     SHIP_SIZE,
-    bulletHeight,
-    bulletSpeed,
-    bulletWidth
+    BULLET_HEIGHT,
+    BULLET_WIDTH
 } = constants; 
-const cellHeight = Math.floor(canvasHeight / cellSize) + 5; 
-const cellWidth = Math.floor(screenWidth / cellSize); 
+const cellHeight = Math.floor((CANVAS_HEIGHT + SHIP_SIZE ) / CELL_HEIGHT); 
+const cellWidth = Math.floor(screenWidth / CELL_WIDTH); 
 export default function Game(){ 
     const [grid, setGrid] = useState([]);
     const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
@@ -59,6 +60,7 @@ export default function Game(){
         // Local in each cell the ship is located adn highlight it
         const rowIndex = Math.round((ship.y + ship.height) / cellHeight); // !!! IMPORTANT !!!
         const row = grid[rowIndex]; 
+        if(!row) return;
         for(let i = 0; i < row.length; i++){
             const cell = row[i];
             cell.isLit = checkOverlap(cell,ship);  
@@ -80,7 +82,7 @@ export default function Game(){
         const x = shooter.getX() + Math.floor(shooter.getWidth() / 2); 
         const y = shooter.getY(); 
         const dir = shooter.isAlien ? 1 : -1; 
-        const bullet = new BulletClass(x,y,bulletWidth,bulletHeight,dir,bulletSpeed);
+        const bullet = new BulletClass(x,y,BULLET_WIDTH,BULLET_HEIGHT,dir);
         setBullets(prev => {
             return [...prev, bullet]; 
         });
@@ -100,12 +102,12 @@ export default function Game(){
     const initializeGame = () => { 
         // Generate alien spaceships
         const alienArray = [];
-        for(let i = 0; i < alienRows; i++){
+        for(let i = 0; i < ALIEN_ROWS; i++){
             const temp = [];
-            for(let j = 0; j < alienCol; j++){
-                const alienX = SHIP_BOUNDS + (alienSize + spaceBetweenAliens) * j; 
-                const alienY = initialAlienY + (alienSize + spaceBetweenAliens) * i;
-                const alienObj = new ShipClass(alienX, alienY, alienSize, alienSize, true);
+            for(let j = 0; j < ALIEN_COL; j++){
+                const alienX = SHIP_BOUNDS + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * j; 
+                const alienY = INITIAL_ALIEN_Y + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * i;
+                const alienObj = new ShipClass(alienX, alienY, ALIEN_SIZE, ALIEN_SIZE, true);
                 temp.push(alienObj);
             }
             alienArray.push(temp);
@@ -116,9 +118,9 @@ export default function Game(){
 
         // Divide the grid 
         const cells = [];
-        for(let row = 0; row < cellSize; row++){
+        for(let row = 0; row < CELL_HEIGHT; row++){
             const temp = [];
-            for(let col = 0; col < cellSize; col++){
+            for(let col = 0; col < CELL_WIDTH; col++){
                 const cellX = cellWidth * col ;
                 const cellY = cellHeight * row; 
                 const cellObj = {
@@ -136,13 +138,13 @@ export default function Game(){
         //------------------------- 
 
     }
-    const alienAttack = () => {
-        for(let i = 0; i  < agressionLevel; i++){
-            let index = aliens.length - 1; 
-            const randomIndex = Math.floor(Math.random() * alienCol);
-            const alien = aliens[index][randomIndex];
-            shoot(alien, true);
+    const moveAlienShips = () => {
+    
+        for(let i = 0; i < aliens.length; i++){
+            
         }
+    }
+    const alienAttack = () => {
 
     }
     useEffect(() => {
@@ -177,7 +179,7 @@ export default function Game(){
             bullets={bullets}
             aliens={aliens}
             moveBullets={moveBullets}
-            canvasHeight={canvasHeight}/>
+            canvasHeight={CANVAS_HEIGHT}/>
             <Controllers shoot={shoot} moveShip={moveShip} shipState={ship}/>
         </SafeAreaView>
     )
