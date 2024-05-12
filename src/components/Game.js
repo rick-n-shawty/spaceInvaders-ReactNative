@@ -28,11 +28,14 @@ const {
     CELL_HEIGHT,
     SHIP_SIZE,
     BULLET_HEIGHT,
-    BULLET_WIDTH
+    BULLET_WIDTH,
+    ALIENS_MOVE_STEPS
 } = constants; 
 const cellHeight = Math.floor((CANVAS_HEIGHT + SHIP_SIZE ) / CELL_HEIGHT); 
 const cellWidth = Math.floor(screenWidth / CELL_WIDTH); 
-export default function Game(){ 
+export default function Game(){
+    const [alienDir,setAlienDir] = useState(Direction.RIGHT); 
+    const [count, setCount] = useState(0);  
     const [grid, setGrid] = useState([]);
     const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
     const [bullets, setBullets] = useState([]); 
@@ -138,15 +141,56 @@ export default function Game(){
         //------------------------- 
 
     }
+
     const moveAlienShips = () => {
-    
+        if(aliens.length < 1) return; 
+        const index = count % aliens.length;
+        let dir = alienDir;
+        const currentRow = aliens[index];
+        let longestRowIndex = 0; 
         for(let i = 0; i < aliens.length; i++){
-            
+            if(aliens[i].length > longestRowIndex){
+                longestRowIndex = aliens[i].length - 1; 
+            }
         }
+        const longestRow = aliens[longestRowIndex]; 
+        const firstEl = longestRow[0]; 
+        const lastEl = longestRow[longestRowIndex]; 
+
+        if(alienDir === Direction.RIGHT && index === 0){
+            if(lastEl.getX() + lastEl.getWidth() + 10 > screenWidth){
+                dir = Direction.DOWN;
+            }
+        }else if(alienDir === Direction.LEFT && index === 0){
+            if(firstEl.getX() - 10 < 0){
+                dir = Direction.DOWN;
+            }
+        }else if(alienDir === Direction.DOWN && index === 0){
+            if(lastEl.getX() + lastEl.getWidth() + 10 > screenWidth){
+                dir = Direction.LEFT; 
+            }else if(firstEl.getX() - 10 < 0){
+                dir = Direction.RIGHT;
+            }
+        }
+        setAlienDir(dir);
+        for(let i = 0; i < currentRow.length; i++){
+            currentRow[i].setDir(dir); 
+            currentRow[i].move(); 
+        }
+        setAliens(prev => {
+            const temp = [...prev]; 
+            temp[index] = currentRow; 
+            return temp;
+        });   
+        setCount(prev => prev + 1);
     }
+
     const alienAttack = () => {
 
     }
+    useEffect(() => {
+        initializeGame();
+    }, []);
     useEffect(() => {
         let interval_id;
         if(bullets.length > 0){
@@ -157,8 +201,9 @@ export default function Game(){
         }
     }, [bullets]) 
     useEffect(() => {
-        initializeGame();
-    }, [])
+        const interval_id = setInterval(moveAlienShips, 100); 
+        return () => clearInterval(interval_id);
+    }, [count, aliens, alienDir])
 
     const showCells = () => {
         const comps = [];
