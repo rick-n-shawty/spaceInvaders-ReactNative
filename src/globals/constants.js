@@ -1,5 +1,5 @@
 export const constants = {
-    SHIP_BOUNDS: 10,
+    SHIP_BOUNDS: 20,
     SHIP_SPEED: 5,
     SHIP_Y: 490,  
     SHIP_SIZE: 30,
@@ -12,9 +12,9 @@ export const constants = {
     ATTACK_PERIOD: 3000,
     AGRESSION: 1, // dependent on alienCol, cannot be bigger than alienCol
     CELL_SIZE: 10,
-    CELL_WIDTH: 5,
-    CELL_HEIGHT: 10, 
-    BULLET_WIDTH: 5,
+    GRID_WIDTH: 10,
+    GRID_HEIGHT: 15, 
+    BULLET_WIDTH: 20,
     BULLET_HEIGHT: 20,
     BULLET_SPEED: 4,
     ALIEN_SHIP_SPEED: 5,

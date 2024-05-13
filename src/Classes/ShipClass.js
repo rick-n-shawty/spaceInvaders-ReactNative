@@ -9,6 +9,7 @@ export class ShipClass{
         this.height = height;  
         this.isAlien = isAlien; 
         this.dir = Direction.RIGHT
+        this.color = 'Blue'
     }
     move(){
         if(this.dir === Direction.RIGHT){
@@ -18,6 +19,18 @@ export class ShipClass{
         }else if(this.dir === Direction.DOWN){
             this.y += ALIEN_SHIP_SPEED; 
         }
+    }
+    move(speed){
+        if(this.dir === Direction.RIGHT){
+            this.x += speed; 
+        }else if(this.dir === Direction.LEFT){
+            this.x -= speed; 
+        }else if(this.dir === Direction.DOWN){
+            this.y += speed; 
+        }
+    }
+    setColor(){
+        
     }
     setDir(dir){
         if(dir in Direction){
@@ -47,5 +60,8 @@ export class ShipClass{
     setPosition(newX, newY){
         this.x = newX;
         this.y = newY; 
+    }
+    setX(newX){
+        
     }
 }

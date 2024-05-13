@@ -7,7 +7,7 @@ export default function Bullet({bullet}){
         <View style={
             [
                 styles.container, 
-                {left: x, top: y, backgroundColor: 'red', height, width}
+                {left: x, top: y, backgroundColor: 'blue', height, width}
             ]
         }>
             
