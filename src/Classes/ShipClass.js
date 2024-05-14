@@ -11,15 +11,6 @@ export class ShipClass{
         this.dir = Direction.RIGHT
         this.color = 'Blue'
     }
-    move(){
-        if(this.dir === Direction.RIGHT){
-            this.x += ALIEN_SHIP_SPEED; 
-        }else if(this.dir === Direction.LEFT){
-            this.x -= ALIEN_SHIP_SPEED; 
-        }else if(this.dir === Direction.DOWN){
-            this.y += ALIEN_SHIP_SPEED; 
-        }
-    }
     move(speed){
         if(this.dir === Direction.RIGHT){
             this.x += speed; 

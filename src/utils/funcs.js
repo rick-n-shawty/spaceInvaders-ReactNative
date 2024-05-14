@@ -23,15 +23,7 @@ export const checkOverlap = (cell,obj) => {
     return false;
 }
 
-export const checkCollision = (ship,bullet) => {
-    if(!(ship instanceof ShipClass) || !(bullet instanceof BulletClass)){
-        console.log('INVALID ARGUMENTS AT checkCollision.js'); 
-        return false; 
-    }
-    const xOverlap = (bullet.getX() >= ship.getX() && bullet.getX() <= ship.getX() + ship.getWidth()) ? true : false;
-    const yOverlap = (bullet.getY() + bullet.getHeight() >= ship.getY() && bullet.getY() + bullet.getHeight() <= ship.getY() + ship.getHeight()) ? true : false; 
-    return xOverlap && yOverlap; 
-}
+
 
 export const detectOverlap = (cell,bullet) => {
     let isX = false; 
@@ -50,23 +42,111 @@ export const detectOverlap = (cell,bullet) => {
     }
     return isX || isY;
 }
-
-export const markCells = (obj, gridCopy, isLit) => {
-    const x_key = Math.floor((obj.getX()) / cellWidth) * cellWidth; // !!! IMPORTANT !!!
+export const removeObjectFromCells = (obj,gridCopy) => {
+    const objX = obj.getX(); 
+    const objY = obj.getY();
+    const x_key = Math.floor((obj.getX()) / cellWidth) * cellWidth; 
     const y_key = Math.floor((obj.getY() + obj.getHeight()) / cellHeight) * cellHeight; 
-
-    const leftTop = gridCopy.get(`${x_key},${y_key}`);
-    const rightTop = gridCopy.get(`${x_key + cellWidth},${y_key}`);
-    const leftBottom = gridCopy.get(`${x_key},${y_key + cellHeight}`);
-    const rightBottom = gridCopy.get(`${x_key + cellWidth},${y_key + cellHeight}`); 
-
-    leftTop['isLit'] = isLit;
-    rightTop['isLit'] = isLit; 
-    leftBottom['isLit'] = isLit; 
-    rightBottom['isLit'] = isLit; 
-    gridCopy.set(`${x_key},${y_key}`, leftTop);
-    gridCopy.set(`${x_key + cellWidth},${y_key}`, rightTop);
-    gridCopy.set(`${x_key},${y_key + cellHeight}`, leftBottom);
-    gridCopy.set(`${x_key + cellWidth},${y_key + cellHeight}`, rightBottom);
-    return gridCopy; 
+    let leftTop,rightTop,leftBottom,rightBottom;
+    if(gridCopy.has(`${x_key},${y_key}`)){
+        leftTop = gridCopy.get(`${x_key},${y_key}`);
+        leftTop['isLit'] = false;
+        if(obj instanceof ShipClass){
+            delete leftTop['enclosedShips'][`${objX},${objY}`] 
+        }else{
+            delete leftTop['enclosedBullets'][`${objX},${objY}`] 
+        }
+        gridCopy.set(`${x_key},${y_key}`, leftTop);
+    }
+    if(gridCopy.has(`${x_key + cellWidth},${y_key}`)){
+        rightTop = gridCopy.get(`${x_key + cellWidth},${y_key}`);
+        if(obj.getX() + obj.getWidth() > rightTop.x){
+            rightTop['isLit'] = false; 
+            if(obj instanceof ShipClass){
+                delete leftTop['enclosedShips'][`${objX},${objY}`];
+            }else{
+                delete leftTop['enclosedBullets'][`${objX},${objY}`];
+            }
+        }
+        gridCopy.set(`${x_key + cellWidth},${y_key}`, rightTop);
+    }
+    if(gridCopy.has(`${x_key},${y_key + cellHeight}`)){
+        leftBottom = gridCopy.get(`${x_key},${y_key + cellHeight}`);
+        if(obj.getY() + obj.getHeight() < leftBottom.y){
+            leftBottom['isLit'] = false;
+            if(obj instanceof ShipClass){
+                delete leftTop['enclosedShips'][`${objX},${objY}`];
+            }else{
+                delete leftTop['enclosedBullets'][`${objX},${objY}`];
+            }
+        }
+        gridCopy.set(`${x_key},${y_key + cellHeight}`, leftBottom);
+    }
+    if(gridCopy.has(`${x_key + cellWidth},${y_key + cellHeight}`)){
+        rightBottom = gridCopy.get(`${x_key + cellWidth},${y_key + cellHeight}`); 
+        if(obj.getY() + obj.getHeight() < rightBottom.y && obj.getX() + obj.getWidth() > rightTop.x){
+            rightBottom['isLit'] = false; 
+            if(obj instanceof ShipClass){
+                delete leftTop['enclosedShips'][`${objX},${objY}`] ;
+            }else{
+                delete leftTop['enclosedBullets'][`${objX},${objY}`] ;
+            }
+        }
+        gridCopy.set(`${x_key + cellWidth},${y_key + cellHeight}`, rightBottom);
+    }
+    return gridCopy;
+}
+export const pushObjectIntoCells = (obj,gridCopy,link) => {
+    const objX = obj.getX(); 
+    const objY = obj.getY();
+    const x_key = Math.floor((obj.getX()) / cellWidth) * cellWidth; 
+    const y_key = Math.floor((obj.getY() + obj.getHeight()) / cellHeight) * cellHeight; 
+    let leftTop,rightTop,leftBottom,rightBottom;
+    if(gridCopy.has(`${x_key},${y_key}`)){
+        leftTop = gridCopy.get(`${x_key},${y_key}`);
+        leftTop['isLit'] = true;
+        if(obj instanceof ShipClass){
+            leftTop['enclosedShips'][`${objX},${objY}`] = {obj,link};
+        }else{
+            leftTop['enclosedBullets'][`${objX},${objY}`] = {obj,link};
+        }
+        gridCopy.set(`${x_key},${y_key}`, leftTop);
+    }
+    if(gridCopy.has(`${x_key + cellWidth},${y_key}`)){
+        rightTop = gridCopy.get(`${x_key + cellWidth},${y_key}`);
+        if(obj.getX() + obj.getWidth() > rightTop.x){
+            rightTop['isLit'] = true; 
+            if(obj instanceof ShipClass){
+                leftTop['enclosedShips'][`${objX},${objY}`] = {obj,link};
+            }else{
+                leftTop['enclosedBullets'][`${objX},${objY}`] = {obj,link};
+            }
+        }
+        gridCopy.set(`${x_key + cellWidth},${y_key}`, rightTop);
+    }
+    if(gridCopy.has(`${x_key},${y_key + cellHeight}`)){
+        leftBottom = gridCopy.get(`${x_key},${y_key + cellHeight}`);
+        if(obj.getY() + obj.getHeight() < leftBottom.y){
+            leftBottom['isLit'] = true;
+            if(obj instanceof ShipClass){
+                leftTop['enclosedShips'][`${objX},${objY}`] = {obj,link};
+            }else{
+                leftTop['enclosedBullets'][`${objX},${objY}`] = {obj,link};
+            }
+        }
+        gridCopy.set(`${x_key},${y_key + cellHeight}`, leftBottom);
+    }
+    if(gridCopy.has(`${x_key + cellWidth},${y_key + cellHeight}`)){
+        rightBottom = gridCopy.get(`${x_key + cellWidth},${y_key + cellHeight}`); 
+        if(obj.getY() + obj.getHeight() < rightBottom.y && obj.getX() + obj.getWidth() > rightTop.x){
+            rightBottom['isLit'] = true; 
+            if(obj instanceof ShipClass){
+                leftTop['enclosedShips'][`${objX},${objY}`] = {obj,link};
+            }else{
+                leftTop['enclosedBullets'][`${objX},${objY}`] = {obj,link};
+            }
+        }
+        gridCopy.set(`${x_key + cellWidth},${y_key + cellHeight}`, rightBottom);
+    }
+    return gridCopy;
 }
