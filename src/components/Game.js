@@ -78,8 +78,28 @@ export default function Game(){
             return [...prev, bullet]; 
         });
     };
-    const checkCollision = (bullet) => {
-
+    const findHitShip = (bullet) => {
+        const x_key = Math.floor((bullet.getX()) / cellWidth) * cellWidth; 
+        const y_key = Math.floor((bullet.getY() + bullet.getHeight()) / cellHeight) * cellHeight; 
+        if(grid.has(`${x_key},${y_key}`)){
+            const leftTopShips = Object.values(grid.get(`${x_key},${y_key}`)['enclosedShips'])
+            for(let value of leftTopShips){
+                const ship = value['obj']; 
+                if(isShipHit(bullet,ship)){
+                    return value['link'];
+                }
+            }
+        }
+        if(grid.has(`${x_key + cellWidth},${y_key}`)){
+            const rightTopShips = Object.values(grid.get(`${x_key + cellWidth},${y_key}`)['enclosedShips'])
+            for(let value of rightTopShips){
+                const ship = value['obj']; 
+                if(isShipHit(bullet,ship)){
+                    return value['link'];
+                }
+            }
+        }
+        return null;
     }
     const moveBullets = () => {
         if(bullets.length < 1) return;
@@ -93,19 +113,13 @@ export default function Game(){
             const bulletY = bullet.getY(); 
             const bulletX = bullet.getX();
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
-            const x_key = Math.floor((bulletX) / cellWidth) * cellWidth; 
-            const y_key = Math.floor((bulletY + bullet.getHeight()) / cellHeight) * cellHeight; 
-            const leftTopShips = Object.values(grid.get(`${x_key},${y_key}`)['enclosedShips']);
-            for(let value of leftTopShips){
-                const ship = value['obj']; 
-                if(isShipHit(bullet,ship)){
-                    const {i,j} = value['link']; 
-                    const shipRow = tempShips[i];
-                    shipRow.splice(j,1);
-                    tempShips[i] = shipRow;
-                    isCollided = true; 
-                    break; 
-                }
+            const link = findHitShip(bullet); 
+            if(link){
+                isCollided = true; 
+                const {i, j} = link;
+                const shipRow = tempShips[i];
+                shipRow.splice(j,1);
+                tempShips[i] = shipRow;
             }
             if(!isCollided){
                 tempBullets.push(bullet); 

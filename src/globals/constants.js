@@ -14,7 +14,7 @@ export const constants = {
     CELL_SIZE: 10,
     GRID_WIDTH: 10,
     GRID_HEIGHT: 15, 
-    BULLET_WIDTH: 20,
+    BULLET_WIDTH: 10,
     BULLET_HEIGHT: 20,
     BULLET_SPEED: 4,
     ALIEN_SHIP_SPEED: 1,
