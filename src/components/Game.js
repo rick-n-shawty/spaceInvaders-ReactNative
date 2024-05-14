@@ -9,11 +9,9 @@ import { ShipClass } from "../Classes/ShipClass";
 import { BulletClass } from "../Classes/BulletClass";
 import Cell from "./Cell";
 import { 
-    checkOverlap, 
-    checkCollision, 
-    detectOverlap,
     pushObjectIntoCells,
-    removeObjectFromCells 
+    removeObjectFromCells,
+    isShipHit 
 } from "../utils/funcs";
 const screenWidth = Dimensions.get('window').width; 
 const { 
@@ -47,7 +45,6 @@ export default function Game(){
     const [bullets, setBullets] = useState([]); 
     const [aliens, setAliens] = useState([]);  
     const [isGameOver, setGameOver] = useState(false); 
-
 
     const moveShip = (dir) => {
         if(dir === Direction.LEFT && ship.getX() - ship.getWidth() < 0) return;
@@ -90,16 +87,18 @@ export default function Game(){
         const tempShips = [...aliens];
         let isCollided = false;  
         for(let i = 0; i < bullets.length; i++){
+            isCollided = false
             const bullet = bullets[i]; 
             bullet.move(); 
             const bulletY = bullet.getY(); 
             const bulletX = bullet.getX();
+            if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
             const x_key = Math.floor((bulletX) / cellWidth) * cellWidth; 
             const y_key = Math.floor((bulletY + bullet.getHeight()) / cellHeight) * cellHeight; 
             const leftTopShips = Object.values(grid.get(`${x_key},${y_key}`)['enclosedShips']);
             for(let value of leftTopShips){
                 const ship = value['obj']; 
-                if(bulletX >= ship.x && bulletX <= ship.x + ship.width && bulletY <= ship.y + ship.height && bulletY >= ship.y){
+                if(isShipHit(bullet,ship)){
                     const {i,j} = value['link']; 
                     const shipRow = tempShips[i];
                     shipRow.splice(j,1);
@@ -108,9 +107,9 @@ export default function Game(){
                     break; 
                 }
             }
-            if(bulletY >= 0 && bulletY <= CANVAS_HEIGHT && !isCollided){
+            if(!isCollided){
                 tempBullets.push(bullet); 
-            }else continue;  
+            }  
         }
         setAliens(tempShips);
         setBullets(tempBullets);
@@ -128,9 +127,7 @@ export default function Game(){
                     width: cellWidth, 
                     height: cellHeight,
                     isLit: false,
-                    isActive: false,
-                    enclosedShips: {},
-                    enclosedBullets: {}
+                    enclosedShips: {}
                 };
                 if(!cells.has(`${cellX},${cellY}`)){
                     cells.set(`${cellX},${cellY}`, cellObj);
@@ -164,7 +161,6 @@ export default function Game(){
         const currentRow = aliensCopy[rowIndex]; 
         let longestRowIndex = 0; 
         for(let i = 0; i < aliensCopy.length; i++){
-            // console.log(i + ': ' + aliensCopy[i]);
             if(aliensCopy[i].length - 1 > longestRowIndex){
                 longestRowIndex = aliensCopy[i].length - 1; 
             }
