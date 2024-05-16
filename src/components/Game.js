@@ -1,6 +1,6 @@
 import * as React from "react"; 
 import { useState, useEffect } from "react";
-import { StyleSheet, SafeAreaView, Dimensions } from "react-native";
+import { StyleSheet, SafeAreaView, Dimensions, Linking } from "react-native";
 import Controllers from "./Controllers";
 import Canvas from "./Canvas";
 import { constants } from "../globals/constants";
@@ -78,23 +78,30 @@ export default function Game(){
             return [...prev, bullet]; 
         });
     };
-    const findHitShip = (bullet) => {
+    const findHitShip = (bullet,tempGrid) => {
         const x_key = Math.floor((bullet.getX()) / cellWidth) * cellWidth; 
         const y_key = Math.floor((bullet.getY() + bullet.getHeight()) / cellHeight) * cellHeight; 
-        if(grid.has(`${x_key},${y_key}`)){
-            const leftTopShips = Object.values(grid.get(`${x_key},${y_key}`)['enclosedShips'])
+        let cell; 
+        if(tempGrid.has(`${x_key},${y_key}`)){
+            cell = tempGrid.get(`${x_key},${y_key}`); 
+            const leftTopShips = Object.values(cell['enclosedShips']);
             for(let value of leftTopShips){
                 const ship = value['obj']; 
+                if(!ship) continue;
                 if(isShipHit(bullet,ship)){
+                    tempGrid = removeObjectFromCells(ship,tempGrid);
                     return value['link'];
-                }
+                }         
             }
         }
-        if(grid.has(`${x_key + cellWidth},${y_key}`)){
-            const rightTopShips = Object.values(grid.get(`${x_key + cellWidth},${y_key}`)['enclosedShips'])
+        if(tempGrid.has(`${x_key + cellWidth},${y_key}`)){
+            cell = tempGrid.get(`${x_key + cellWidth},${y_key}`)
+            const rightTopShips = Object.values(cell['enclosedShips'])
             for(let value of rightTopShips){
                 const ship = value['obj']; 
+                if(!ship) continue;
                 if(isShipHit(bullet,ship)){
+                    tempGrid = removeObjectFromCells(ship,tempGrid); 
                     return value['link'];
                 }
             }
@@ -105,18 +112,22 @@ export default function Game(){
         if(bullets.length < 1) return;
         const tempBullets = []; 
         const tempShips = [...aliens];
+        const tempGrid = new Map(grid); 
         let isCollided = false;  
         for(let i = 0; i < bullets.length; i++){
+            console.log(tempBullets[tempBullets.length - 1]);
             isCollided = false
             const bullet = bullets[i]; 
             bullet.move(); 
             const bulletY = bullet.getY(); 
             const bulletX = bullet.getX();
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
-            const link = findHitShip(bullet); 
+
+
+            const link = findHitShip(bullet,tempGrid); 
             if(link){
-                isCollided = true; 
                 const {i, j} = link;
+                isCollided = true; 
                 const shipRow = tempShips[i];
                 shipRow.splice(j,1);
                 tempShips[i] = shipRow;
@@ -125,6 +136,8 @@ export default function Game(){
                 tempBullets.push(bullet); 
             }  
         }
+        console.log(tempBullets[0]);
+        setGrid(tempGrid);
         setAliens(tempShips);
         setBullets(tempBullets);
     };

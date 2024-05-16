@@ -11,7 +11,8 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
         for(let i = 0; i < aliens.length; i++){
             for(let j = 0; j < aliens[i].length; j++){
                 const alien = aliens[i][j]; 
-                const comp = <Alien key={`${i},${j}`} alien={alien}/>
+                const uniqueKey = i + ":" + j + ":" + (Math.floor(Math.random() * 100)) + i + j;
+                const comp = <Alien key={uniqueKey} alien={alien}/>
                 arr.push(comp);
             }
         }
@@ -21,7 +22,9 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
         <View style={[styles.container, {height: canvasHeight}]}>
             <Ship ship={ship}/>
             {bullets.map((bullet, index) => {
-                return <Bullet key={index} bullet={bullet}/>
+                const randomInt = Math.floor(Math.random() * 100);
+                const uniqueKey = index + ':' + bullet.getX() + ":" + bullet.getY() + ':' + randomInt;  
+                return <Bullet key={uniqueKey} bullet={bullet}/>
             })}
             {renderAliens()}
         </View>
