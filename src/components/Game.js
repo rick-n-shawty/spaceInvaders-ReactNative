@@ -1,6 +1,6 @@
 import * as React from "react"; 
-import { useState, useEffect } from "react";
-import { StyleSheet, SafeAreaView, Dimensions, Linking } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { StyleSheet, SafeAreaView, Dimensions} from "react-native";
 import Controllers from "./Controllers";
 import Canvas from "./Canvas";
 import { constants } from "../globals/constants";
@@ -39,7 +39,7 @@ const cellHeight = Math.floor((CANVAS_HEIGHT + 50) / GRID_HEIGHT);
 const cellWidth = Math.floor(screenWidth / GRID_WIDTH); 
 export default function Game(){
     const [alienDir,setAlienDir] = useState(Direction.RIGHT); 
-    const [count, setCount] = useState(0);  
+    const [rowIndex,setRowIndex] = useState(0);
     const [grid, setGrid] = useState(new Map());
     const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
     const [bullets, setBullets] = useState([]); 
@@ -85,7 +85,7 @@ export default function Game(){
         //------------------------- 
     }
     const restartGame = () => {
-        setCount(0); 
+        setRowIndex(0);
         setAlienDir(Direction.RIGHT); 
         setShip(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
         setBullets([]); 
@@ -162,12 +162,10 @@ export default function Game(){
         const tempGrid = new Map(grid); 
         let isCollided = false;  
         for(let i = 0; i < bullets.length; i++){
-            console.log(tempBullets[tempBullets.length - 1]);
             isCollided = false
             const bullet = bullets[i]; 
             bullet.move(); 
             const bulletY = bullet.getY(); 
-            const bulletX = bullet.getX();
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
             const link = findHitShip(bullet,tempGrid); 
             if(link){
@@ -184,75 +182,94 @@ export default function Game(){
         setGrid(tempGrid);
         setAliens(tempShips);
         setBullets(tempBullets);
+        // return {newBullets: tempBullets, newShips: tempShips, newGrid: tempGrid};
     };
-    
-    const moveAlienShips = () => {
-        if(aliens.length < 1) return;
-        const aliensCopy = [...aliens]; 
-        const rowIndex = count % aliensCopy.length;
-        const currentRow = aliensCopy[rowIndex]; 
-        let longestRowIndex = 0; 
-        for(let i = 0; i < aliensCopy.length; i++){
-            if(aliensCopy[i].length - 1 > longestRowIndex){
-                longestRowIndex = aliensCopy[i].length - 1; 
-            }
-        } 
-        const longestRow = aliensCopy[longestRowIndex]; 
-        const firstEl = longestRow[0]; 
-        const lastEl = longestRow[longestRow.length - 1]; 
-        let dir = alienDir 
-        if(alienDir === Direction.RIGHT && rowIndex === 0){
-            if(lastEl.getX() + lastEl.getWidth() + 10 > screenWidth){
-                dir = Direction.DOWN;
-            }
-        }else if(alienDir === Direction.LEFT && rowIndex === 0){
-            if(firstEl.getX() - 10 < 0){
-                dir = Direction.DOWN;
-            }
-        }else if(alienDir === Direction.DOWN && rowIndex === 0){
-            if(lastEl.getX() + lastEl.getWidth() + 10 > screenWidth){
-                dir = Direction.LEFT; 
-            }else if(firstEl.getX() - 10 < 0){
-                dir = Direction.RIGHT;
-            }
-        }
-        let cells = new Map(grid); 
-        for(let i = 0; i < currentRow.length; i++){
-            currentRow[i].setDir(dir);
-            cells = removeObjectFromCells(currentRow[i],cells);
-            currentRow[i].move(ALIEN_SHIP_SPEED);
-            cells = pushObjectIntoCells(currentRow[i],cells,{i: rowIndex, j: i});
-        }
-        setGrid(cells);
-        setAlienDir(dir);
-        setCount(prev => prev + 1);
-    }
-
-
-
     useEffect(() => {
         initializeGame();
     }, []);
 
     // movement of the bullets 
-    useEffect(() => {
-        let interval_id;
-        if(!isGameOver && bullets.length > 0){
-            interval_id = setInterval(moveBullets, 10); 
+    // useEffect(() => {
+    //     let interval_id;
+    //     if(!isGameOver && bullets.length > 0){
+    //         interval_id = setInterval(moveBullets, 10); 
+    //     }
+    //     return () => {
+    //         clearInterval(interval_id);
+    //     }
+    // }, [aliens,bullets,isGameOver,grid]) 
+    const moveAliens = () => {
+        const newShips = [...aliens]; 
+        const currentRow = newShips[rowIndex]; 
+        let gridCopy = new Map(grid); 
+        let newDirection = alienDir; 
+        if(alienDir === Direction.RIGHT && rowIndex < newShips.length){
+            const lastShip = currentRow[currentRow.length - 1]; 
+            // check if the last ship is about to cross the border 
+            if(lastShip.getX() + lastShip.getWidth() + 10 > screenWidth && rowIndex === 0){
+                setRowIndex(rowIndex + 1); 
+                setAlienDir(Direction.DOWN);
+                setAliens(newShips); 
+                setGrid(gridCopy);  
+                return;      
+            }
+        }else if(alienDir === Direction.LEFT && rowIndex < newShips.length){
+            const firstShip = currentRow[0];
+            // check if the first ship is about to hit the border
+            if(firstShip.getX() - 10 < 0 && rowIndex === 0){
+                setAliens(newShips); 
+                setGrid(gridCopy); 
+                setAlienDir(Direction.DOWN); 
+                setRowIndex(rowIndex + 1); 
+                return; 
+            }
+        }else if(alienDir === Direction.DOWN && rowIndex < newShips.length){
+            // check if we are approaching the very bottom... 
+            //------ 
+            const firstShip = newShips[rowIndex][0]; 
+            const lastShip = newShips[rowIndex][currentRow.length - 1];
+            if(rowIndex === 0 && lastShip.getX() + lastShip.getWidth() + 10 > screenWidth){
+                newDirection = Direction.LEFT;
+            }else if(rowIndex === 0 && firstShip.getX() - 10 < 0){
+                newDirection = Direction.RIGHT; 
+            }
         }
-        return () => {
-            clearInterval(interval_id);
-        }
-    }, [aliens,bullets,isGameOver]) 
 
-    // movement of alien spaceships 
-    useEffect(() => { 
-        let interval_id; 
-        if(!isGameOver){
-            interval_id = setInterval(moveAlienShips, 10); 
+
+        for(let i = 0; i < currentRow.length; i++){
+            const alien = currentRow[i]; 
+            gridCopy = removeObjectFromCells(alien,gridCopy); 
+            alien.setDir(alienDir); 
+            alien.move(4); 
+            gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
+            currentRow[i] = alien; 
         }
-        return () => clearInterval(interval_id);
-    }, [aliens,count,isGameOver,bullets])
+        newShips[rowIndex] = currentRow;
+        if(rowIndex < newShips.length - 1){
+            setRowIndex(rowIndex + 1); 
+        }else{
+            setRowIndex(0); 
+        }
+        setAliens(newShips); 
+        setAlienDir(newDirection);
+        setGrid(gridCopy); 
+    }
+    useEffect(() => {
+        let alienInterval; 
+        if(!isGameOver && aliens.length > 0){
+            alienInterval = setInterval(() => moveAliens(),10); 
+        }
+        return () => clearInterval(alienInterval);
+    }, [isGameOver,grid,aliens,rowIndex]);
+
+    useEffect(() => {
+        let bulletInterval; 
+        if(!isGameOver && bullets.length > 0){
+            bulletInterval = setInterval(() => moveBullets(),10); 
+        }
+        return () => clearInterval(bulletInterval);
+    }, [isGameOver,grid,bullets]); 
+
 
     const showCells = () => {
         if(grid.size === 0) return;

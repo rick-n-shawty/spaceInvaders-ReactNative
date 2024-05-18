@@ -15,9 +15,5 @@ export default function Alien({alien}){
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        backgroundColor: 'purple'
-    },
-    imgStyle: {
-    
     }
 })
