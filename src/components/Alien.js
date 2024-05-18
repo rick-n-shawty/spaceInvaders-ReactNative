@@ -5,15 +5,16 @@ export default function Alien({alien}){
     const { width, height } = alien.getSize();
     return(
         <View style={[styles.container, {left: x, top: y, height: height, width: width}]}>
-            <Image
+            {/* <Image
              source={require('../../assets/images/greenAlienShip.jpg')}
              style={{height: height, width: width}}
-            />
+            /> */}
         </View>
     )
 }
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
+        backgroundColor: 'green'
     }
 })

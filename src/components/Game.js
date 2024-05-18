@@ -97,7 +97,7 @@ export default function Game(){
         if(dir === Direction.LEFT && ship.getX() - ship.getWidth() < 0) return;
         else if(dir === Direction.RIGHT && ship.getX() + ship.getWidth() * 2 > screenWidth) return; 
         const tempShip = new ShipClass(ship.x, ship.y, ship.width, ship.height,false); 
-        let gridCopy = removeObjectFromCells(tempShip, new Map(grid)); 
+        // let gridCopy = removeObjectFromCells(tempShip, new Map(grid)); 
 
         if(dir === Direction.LEFT){
             tempShip.setDir(Direction.LEFT); 
@@ -107,8 +107,8 @@ export default function Game(){
             tempShip.move(SHIP_SPEED);
         }
 
-        gridCopy = pushObjectIntoCells(tempShip,gridCopy,{mainShip: true});
-        setGrid(gridCopy);
+        // gridCopy = pushObjectIntoCells(tempShip,gridCopy,{mainShip: true});
+        // setGrid(gridCopy);
         setShip(tempShip)
     }
     
