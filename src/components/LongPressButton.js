@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"; 
 import { TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons"; 
-export default function LongPressButton({iconName, iconSize, dir, moveShip, shipState}){
+export default function LongPressButton({iconName, iconSize, dir, moveShip, shipState,color}){
     const [isPressed, setIsPressed] = useState(false); 
     const pressIn = () => {
         setIsPressed(true); 
@@ -18,7 +18,7 @@ export default function LongPressButton({iconName, iconSize, dir, moveShip, ship
     }, [isPressed, shipState])
     return(
         <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut}>
-            <AntDesign name={iconName} size={iconSize}/>
+            <AntDesign name={iconName} size={iconSize} color={color}/>
         </TouchableOpacity>
     )
 }

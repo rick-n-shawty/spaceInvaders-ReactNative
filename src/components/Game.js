@@ -44,8 +44,55 @@ export default function Game(){
     const [ship, setShip] = useState(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
     const [bullets, setBullets] = useState([]); 
     const [aliens, setAliens] = useState([]);  
-    const [isGameOver, setGameOver] = useState(false); 
+    const [isGameOver, setGameOver] = useState(true); 
+    const initializeGame = () => { 
+        // Divide the grid 
+        let cells = new Map();
+        for(let row = 0; row <  GRID_HEIGHT; row++){
+            for(let col = 0; col < GRID_WIDTH; col++){
+                const cellX = cellWidth * col ;
+                const cellY = cellHeight * row; 
+                const cellObj = {
+                    x: cellX, 
+                    y: cellY, 
+                    width: cellWidth, 
+                    height: cellHeight,
+                    isLit: false,
+                    enclosedShips: {}
+                };
+                if(!cells.has(`${cellX},${cellY}`)){
+                    cells.set(`${cellX},${cellY}`, cellObj);
+                }
+            }
+        }
+        //------------------------- 
 
+        // Generate alien spaceships
+        const alienArray = [];
+        for(let i = 0; i < ALIEN_ROWS; i++){
+            const temp = [];
+            for(let j = 0; j < ALIEN_COL; j++){
+                const alienX = SHIP_BOUNDS + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * j; 
+                const alienY = INITIAL_ALIEN_Y + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * i;
+                const alienObj = new ShipClass(alienX, alienY, ALIEN_SIZE, ALIEN_SIZE, true);
+                cells = pushObjectIntoCells(alienObj,cells,{ i: i,j: j });
+                temp.push(alienObj);
+            }
+            alienArray.push(temp);
+        }
+        setGrid(cells);
+        setAliens(alienArray);  
+        //------------------------- 
+    }
+    const restartGame = () => {
+        setCount(0); 
+        setAlienDir(Direction.RIGHT); 
+        setShip(new ShipClass(100,SHIP_Y, SHIP_SIZE, SHIP_SIZE, false));
+        setBullets([]); 
+        
+        initializeGame(); 
+        setGameOver(false); 
+    }
     const moveShip = (dir) => {
         if(dir === Direction.LEFT && ship.getX() - ship.getWidth() < 0) return;
         else if(dir === Direction.RIGHT && ship.getX() + ship.getWidth() * 2 > screenWidth) return; 
@@ -122,8 +169,6 @@ export default function Game(){
             const bulletY = bullet.getY(); 
             const bulletX = bullet.getX();
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
-
-
             const link = findHitShip(bullet,tempGrid); 
             if(link){
                 const {i, j} = link;
@@ -136,50 +181,10 @@ export default function Game(){
                 tempBullets.push(bullet); 
             }  
         }
-        console.log(tempBullets[0]);
         setGrid(tempGrid);
         setAliens(tempShips);
         setBullets(tempBullets);
     };
-    const initializeGame = () => { 
-        // Divide the grid 
-        let cells = new Map();
-        for(let row = 0; row <  GRID_HEIGHT; row++){
-            for(let col = 0; col < GRID_WIDTH; col++){
-                const cellX = cellWidth * col ;
-                const cellY = cellHeight * row; 
-                const cellObj = {
-                    x: cellX, 
-                    y: cellY, 
-                    width: cellWidth, 
-                    height: cellHeight,
-                    isLit: false,
-                    enclosedShips: {}
-                };
-                if(!cells.has(`${cellX},${cellY}`)){
-                    cells.set(`${cellX},${cellY}`, cellObj);
-                }
-            }
-        }
-        //------------------------- 
-
-        // Generate alien spaceships
-        const alienArray = [];
-        for(let i = 0; i < ALIEN_ROWS; i++){
-            const temp = [];
-            for(let j = 0; j < ALIEN_COL; j++){
-                const alienX = SHIP_BOUNDS + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * j; 
-                const alienY = INITIAL_ALIEN_Y + (ALIEN_SIZE + SPACE_BETWEEN_ALIENS) * i;
-                const alienObj = new ShipClass(alienX, alienY, ALIEN_SIZE, ALIEN_SIZE, true);
-                cells = pushObjectIntoCells(alienObj,cells,{ i: i,j: j });
-                temp.push(alienObj);
-            }
-            alienArray.push(temp);
-        }
-        setGrid(cells);
-        setAliens(alienArray);  
-        //------------------------- 
-    }
     
     const moveAlienShips = () => {
         if(aliens.length < 1) return;
@@ -222,6 +227,9 @@ export default function Game(){
         setAlienDir(dir);
         setCount(prev => prev + 1);
     }
+
+
+
     useEffect(() => {
         initializeGame();
     }, []);
@@ -258,14 +266,20 @@ export default function Game(){
 
     return(
         <SafeAreaView style={styles.container}>
-            {showCells()}
+            {/* {showCells()} */}
             <Canvas 
             ship={ship}
             bullets={bullets}
             aliens={aliens}
             moveBullets={moveBullets}
             canvasHeight={CANVAS_HEIGHT}/>
-            <Controllers shoot={shoot} moveShip={moveShip} shipState={ship}/>
+            <Controllers 
+            shoot={shoot} 
+            moveShip={moveShip} 
+            shipState={ship}
+            isGameOver={isGameOver}
+            restartGame={restartGame}
+            />
         </SafeAreaView>
     )
 }
