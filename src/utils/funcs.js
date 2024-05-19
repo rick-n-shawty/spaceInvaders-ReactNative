@@ -101,3 +101,8 @@ export const isShipHit = (bullet, ship) => {
     }
     return false;
 }
+
+
+// export const checkBulletPlayerCollision = () => {
+
+// }

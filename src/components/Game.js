@@ -159,24 +159,42 @@ export default function Game(){
         const tempShips = [...aliens];
         const tempGrid = new Map(grid); 
         let isCollided = false;  
+        // loop through each bullet in the state 
         for(let i = 0; i < bullets.length; i++){
             isCollided = false
             const bullet = bullets[i]; 
             bullet.move(); 
-            const bulletY = bullet.getY(); 
+            const bulletY = bullet.getY();  
+            // check if the bullet is out of bounds
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
 
+            // check for collisions
             if(bullet.getDir() > 0){
+                // check collision of alien bullets against the player ship
+
+                // dont check bullets that aren't close to the player's ship 
+                if(bullet.getY() < SHIP_Y){
+                    tempBullets.push(bullet); 
+                    continue;
+                };
+                if(isShipHit(bullet,ship)){
+                    // player's ship is hit, end the game 
+                    setGameOver(true); 
+                    return; 
+                }
             }else{
+                // check collision of player bullets against alien ships
                 const link = findHitShip(bullet,tempGrid); 
                 if(link){
                     const {i, j} = link;
                     isCollided = true; 
-                    const shipRow = tempShips[i];
+                    // remove the ship from the state and the grid
+                    const shipRow = tempShips[i]; 
                     shipRow.splice(j,1);
                     tempShips[i] = shipRow;
                 }
             }
+            // keep the bullet as long as it hasn't collided 
             if(!isCollided){
                 tempBullets.push(bullet); 
             }  
@@ -184,7 +202,6 @@ export default function Game(){
         setGrid(tempGrid);
         setAliens(tempShips);
         setBullets(tempBullets);
-        // return {newBullets: tempBullets, newShips: tempShips, newGrid: tempGrid};
     };
     useEffect(() => {
         initializeGame();
@@ -271,7 +288,7 @@ export default function Game(){
     useEffect(() => { 
         let alienAttack_interval; 
         if(!isGameOver){
-            alienAttack_interval = setInterval(alienAttack,1000); 
+            alienAttack_interval = setInterval(alienAttack, 1000); 
         }
         return () => clearInterval(alienAttack_interval); 
     }, [isGameOver]); 
@@ -310,6 +327,7 @@ export default function Game(){
             ship={ship}
             bullets={bullets}
             aliens={aliens}
+            isGameOver={isGameOver}
             moveBullets={moveBullets}
             canvasHeight={CANVAS_HEIGHT}/>
             <Controllers 

@@ -4,8 +4,9 @@ import { View, StyleSheet } from "react-native";
 import { constants } from "../globals/constants";
 import Bullet from "./Bullet";
 import Alien from "./Alien";
+import GameOver from "./GameOver";
 const { alienSize } = constants;
-export default function Canvas({canvasHeight, ship, bullets, aliens}){
+export default function Canvas({canvasHeight, ship, bullets, aliens,isGameOver}){
     const renderAliens = () => {
         const arr =[]
         for(let i = 0; i < aliens.length; i++){
@@ -18,17 +19,25 @@ export default function Canvas({canvasHeight, ship, bullets, aliens}){
         }
         return arr; 
     }
-    return (
-        <View style={[styles.container, {height: canvasHeight}]}>
-            <Ship ship={ship}/>
-            {bullets.map((bullet, index) => {
-                const randomInt = Math.floor(Math.random() * 100);
-                const uniqueKey = index + ':' + bullet.getX() + ":" + bullet.getY() + ':' + randomInt;  
-                return <Bullet key={uniqueKey} bullet={bullet}/>
-            })}
-            {renderAliens()}
-        </View>
-    );
+    if(isGameOver){
+        return(
+            <View style={[styles.container, {height: canvasHeight}]}>
+                <GameOver/>
+            </View>
+        )
+    }else{
+        return (
+            <View style={[styles.container, {height: canvasHeight}]}>
+                <Ship ship={ship}/>
+                {bullets.map((bullet, index) => {
+                    const randomInt = Math.floor(Math.random() * 100);
+                    const uniqueKey = index + ':' + bullet.getX() + ":" + bullet.getY() + ':' + randomInt;  
+                    return <Bullet key={uniqueKey} bullet={bullet}/>
+                })}
+                {renderAliens()}
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
