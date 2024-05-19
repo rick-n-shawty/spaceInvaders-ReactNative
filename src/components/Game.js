@@ -45,6 +45,10 @@ export default function Game(){
     const [bullets, setBullets] = useState([]); 
     const [aliens, setAliens] = useState([]);  
     const [isGameOver, setGameOver] = useState(true); 
+    const [message, setMessage] = useState("Start the game!");
+
+
+
     const initializeGame = () => { 
         // Divide the grid 
         let cells = new Map();
@@ -155,6 +159,7 @@ export default function Game(){
     const moveBullets = () => {
         if(bullets.length < 1) return;
         else if(aliens.length < 1){
+            setMessage("You win!");
             setGameOver(true); 
             return;
         }
@@ -182,6 +187,7 @@ export default function Game(){
                 };
                 if(isShipHit(bullet,ship)){
                     // player's ship is hit, end the game 
+                    setMessage("You lose!");
                     setGameOver(true); 
                     return; 
                 }
@@ -217,36 +223,39 @@ export default function Game(){
     const moveAliens = () => {
         const newShips = [...aliens]; 
         const currentRow = newShips[rowIndex]; 
+        if(!currentRow){
+            // setRowIndex(); 
+            newShips.splice(rowIndex,1); 
+            setRowIndex(0);
+            setAliens(newShips);   
+            return; 
+        }
         let gridCopy = new Map(grid); 
         let newDirection = alienDir; 
         if(alienDir === Direction.RIGHT && rowIndex < newShips.length){
             const lastShip = currentRow[currentRow.length - 1]; 
             // check if the last ship is about to cross the border
-            if(lastShip){
-                if(lastShip.getX() + lastShip.getWidth() + 10 > screenWidth && rowIndex === 0){
-                    setRowIndex(rowIndex + 1); 
-                    setAlienDir(Direction.DOWN);
-                    setAliens(newShips); 
-                    setGrid(gridCopy);  
-                    return;      
-                }
-            } 
+            if(lastShip.getX() + lastShip.getWidth() + 10 > screenWidth && rowIndex === 0){
+                setRowIndex(rowIndex + 1); 
+                setAlienDir(Direction.DOWN);
+                setAliens(newShips); 
+                setGrid(gridCopy);  
+                return;      
+            }
         }else if(alienDir === Direction.LEFT && rowIndex < newShips.length){
             const firstShip = currentRow[0];
-            
             // check if the first ship is about to hit the border
-            if(firstShip){
-                if(firstShip.getX() - 10 < 0 && rowIndex === 0){
-                    setAliens(newShips); 
-                    setGrid(gridCopy); 
-                    setAlienDir(Direction.DOWN); 
-                    setRowIndex(rowIndex + 1); 
-                    return; 
-                }
+            if(firstShip.getX() - 10 < 0 && rowIndex === 0){
+                setAliens(newShips); 
+                setGrid(gridCopy); 
+                setAlienDir(Direction.DOWN); 
+                setRowIndex(rowIndex + 1); 
+                return; 
             }
         }else if(alienDir === Direction.DOWN && rowIndex < newShips.length){
             // check if we are approaching the very bottom... 
             //------ 
+            // i
             const firstShip = newShips[rowIndex][0]; 
             const lastShip = newShips[rowIndex][currentRow.length - 1];
             if(rowIndex === 0 && lastShip.getX() + lastShip.getWidth() + 10 > screenWidth){
@@ -256,15 +265,13 @@ export default function Game(){
             }
         }
 
-        if(currentRow){
-            for(let i = 0; i < currentRow.length; i++){
-                const alien = currentRow[i]; 
-                gridCopy = removeObjectFromCells(alien,gridCopy); 
-                alien.setDir(alienDir); 
-                alien.move(4); 
-                gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
-                currentRow[i] = alien; 
-            }
+        for(let i = 0; i < currentRow.length; i++){
+            const alien = currentRow[i]; 
+            gridCopy = removeObjectFromCells(alien,gridCopy); 
+            alien.setDir(alienDir); 
+            alien.move(4); 
+            gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
+            currentRow[i] = alien; 
         }
         newShips[rowIndex] = currentRow;
         if(rowIndex < newShips.length - 1){
@@ -328,6 +335,7 @@ export default function Game(){
             aliens={aliens}
             isGameOver={isGameOver}
             moveBullets={moveBullets}
+            message={message}
             canvasHeight={CANVAS_HEIGHT}/>
             <Controllers 
             shoot={shoot} 

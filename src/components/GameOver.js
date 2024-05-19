@@ -1,9 +1,10 @@
 import * as React from "react"; 
 import { View, Text, StyleSheet } from "react-native"; 
-export default function GameOver(){
+export default function GameOver({message}){
+
     return(
         <View style={styles.container}>
-            <Text style={styles.text}>Game Over</Text>
+            <Text style={[styles.text, {color: message === 'You lose!' ? 'red' : 'green'}]}>{message}</Text>
         </View>
     )
 }

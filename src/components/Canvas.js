@@ -1,15 +1,15 @@
 import * as React from "react"; 
 import Ship from "./Ship";
 import { View, StyleSheet } from "react-native";
-import { constants } from "../globals/constants";
 import Bullet from "./Bullet";
 import Alien from "./Alien";
 import GameOver from "./GameOver";
-export default function Canvas({canvasHeight, ship, bullets, aliens,isGameOver}){
+export default function Canvas({canvasHeight, ship, bullets, aliens,isGameOver, message}){
     const renderAliens = () => {
         const arr = []; 
         if(aliens.length < 1) return [];
         for(let i = 0; i < aliens.length; i++){
+            if(!aliens[i]) continue;
             for(let j = 0; j < aliens[i].length; j++){
                 const alien = aliens[i][j]; 
                 const uniqueKey = i + ":" + j + ":" + (Math.floor(Math.random() * 100)) + i + j;
@@ -22,7 +22,7 @@ export default function Canvas({canvasHeight, ship, bullets, aliens,isGameOver})
     if(isGameOver){
         return(
             <View style={[styles.container, {height: canvasHeight}]}>
-                <GameOver/>
+                <GameOver message={message}/>
             </View>
         )
     }else{
