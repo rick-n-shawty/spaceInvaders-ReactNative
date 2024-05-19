@@ -5,10 +5,10 @@ import { constants } from "../globals/constants";
 import Bullet from "./Bullet";
 import Alien from "./Alien";
 import GameOver from "./GameOver";
-const { alienSize } = constants;
 export default function Canvas({canvasHeight, ship, bullets, aliens,isGameOver}){
     const renderAliens = () => {
-        const arr =[]
+        const arr = []; 
+        if(aliens.length < 1) return [];
         for(let i = 0; i < aliens.length; i++){
             for(let j = 0; j < aliens[i].length; j++){
                 const alien = aliens[i][j]; 

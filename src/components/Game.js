@@ -256,14 +256,15 @@ export default function Game(){
             }
         }
 
-
-        for(let i = 0; i < currentRow.length; i++){
-            const alien = currentRow[i]; 
-            gridCopy = removeObjectFromCells(alien,gridCopy); 
-            alien.setDir(alienDir); 
-            alien.move(4); 
-            gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
-            currentRow[i] = alien; 
+        if(currentRow){
+            for(let i = 0; i < currentRow.length; i++){
+                const alien = currentRow[i]; 
+                gridCopy = removeObjectFromCells(alien,gridCopy); 
+                alien.setDir(alienDir); 
+                alien.move(4); 
+                gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
+                currentRow[i] = alien; 
+            }
         }
         newShips[rowIndex] = currentRow;
         if(rowIndex < newShips.length - 1){
