@@ -207,6 +207,11 @@ export default function Game(){
                 tempBullets.push(bullet); 
             }  
         }
+        if(tempShips.length < 1){
+            setGameOver(true); 
+            setMessage('You win!');
+            return;
+        }
         setGrid(tempGrid);
         setAliens(tempShips);
         setBullets(tempBullets);
@@ -249,8 +254,6 @@ export default function Game(){
             }
         }else if(alienDir === Direction.DOWN && rowIndex < newShips.length){
             // check if we are approaching the very bottom... 
-            //------ 
-            // i
             const firstShip = newShips[rowIndex][0]; 
             const lastShip = newShips[rowIndex][currentRow.length - 1];
             if(rowIndex === 0 && lastShip.getX() + lastShip.getWidth() + 10 > screenWidth){
@@ -293,7 +296,7 @@ export default function Game(){
     useEffect(() => { 
         let alienAttack_interval; 
         if(!isGameOver){
-            alienAttack_interval = setInterval(alienAttack, 1000); 
+            alienAttack_interval = setInterval(() => alienAttack(), 1000); 
         }
         return () => clearInterval(alienAttack_interval); 
     }, [isGameOver]); 
@@ -313,7 +316,6 @@ export default function Game(){
         return () => clearInterval(bulletInterval);
     }, [isGameOver,grid,bullets]); 
 
-  
     const showCells = () => {
         if(grid.size === 0) return;
         const comps = [];
@@ -323,8 +325,6 @@ export default function Game(){
         }
         return comps;
     }
-
-
     return(
         <SafeAreaView style={styles.container}>
             {/* {showCells()} */}
