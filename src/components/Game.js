@@ -24,16 +24,11 @@ const {
     ALIEN_SIZE,
     SPACE_BETWEEN_ALIENS,
     INITIAL_ALIEN_Y,
-    ALIEN_SHIP_SPEED,
-    ATTACK_PERIOD,
-    AGRESSION,
-    CELL_SIZE,
     GRID_WIDTH,
     GRID_HEIGHT,
     SHIP_SIZE,
     BULLET_HEIGHT,
     BULLET_WIDTH,
-    ALIENS_MOVE_STEPS
 } = constants; 
 const cellHeight = Math.floor((CANVAS_HEIGHT + 50) / GRID_HEIGHT); 
 const cellWidth = Math.floor(screenWidth / GRID_WIDTH); 
@@ -269,7 +264,11 @@ export default function Game(){
             const alien = currentRow[i]; 
             gridCopy = removeObjectFromCells(alien,gridCopy); 
             alien.setDir(alienDir); 
-            alien.move(4); 
+            if(alienDir === Direction.DOWN){
+                alien.move(10); 
+            }else{
+                alien.move(4);
+            }
             gridCopy = pushObjectIntoCells(alien,gridCopy,{i: rowIndex, j: i}); 
             currentRow[i] = alien; 
         }
