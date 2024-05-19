@@ -11,7 +11,7 @@ import Cell from "./Cell";
 import { 
     pushObjectIntoCells,
     removeObjectFromCells,
-    isShipHit 
+    isShipHit,
 } from "../utils/funcs";
 const screenWidth = Dimensions.get('window').width; 
 const { 
@@ -107,7 +107,6 @@ export default function Game(){
         }
         setShip(tempShip)
     }
-    
     const shoot = (shooter) => {
         if(!(shooter instanceof ShipClass)){
             console.log('SHOOTER MUST BE THE INSTANCE OF SHIP CLASS!')
@@ -155,6 +154,10 @@ export default function Game(){
     }
     const moveBullets = () => {
         if(bullets.length < 1) return;
+        else if(aliens.length < 1){
+            setGameOver(true); 
+            return;
+        }
         const tempBullets = []; 
         const tempShips = [...aliens];
         const tempGrid = new Map(grid); 
@@ -173,7 +176,7 @@ export default function Game(){
                 // check collision of alien bullets against the player ship
 
                 // dont check bullets that aren't close to the player's ship 
-                if(bullet.getY() < SHIP_Y){
+                if(bullet.getY() < SHIP_Y - 10){
                     tempBullets.push(bullet); 
                     continue;
                 };
@@ -279,11 +282,12 @@ export default function Game(){
         setGrid(gridCopy); 
     }
     const alienAttack = () => {
-        const firstRow = aliens[aliens.length - 1]; 
-        const randomShooter = firstRow[Math.floor(Math.random() * firstRow.length)]; 
-        if(randomShooter){
-            shoot(randomShooter);
-        }   
+        const randomRow = Math.floor(Math.random() * aliens.length); 
+        const row = aliens[randomRow]; 
+        const shooter = row[Math.floor(Math.random() * aliens.length)]; 
+        if(shooter){
+            shoot(shooter); 
+        }
     }
     useEffect(() => { 
         let alienAttack_interval; 

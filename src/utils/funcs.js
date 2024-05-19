@@ -103,6 +103,9 @@ export const isShipHit = (bullet, ship) => {
 }
 
 
-// export const checkBulletPlayerCollision = () => {
+export const randomDistinct = (min, max) =>{
 
-// }
+}
+
+
+  
