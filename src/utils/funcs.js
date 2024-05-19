@@ -103,9 +103,6 @@ export const isShipHit = (bullet, ship) => {
 }
 
 
-export const randomDistinct = (min, max) =>{
-
-}
 
 
   

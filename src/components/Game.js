@@ -194,7 +194,11 @@ export default function Game(){
                     // remove the ship from the state and the grid
                     const shipRow = tempShips[i]; 
                     shipRow.splice(j,1);
-                    tempShips[i] = shipRow;
+                    if(shipRow.length < 1){
+                        tempShips.splice(i,1);
+                    }else{
+                        tempShips[i] = shipRow;
+                    }
                 }
             }
             // keep the bullet as long as it hasn't collided 
@@ -210,16 +214,6 @@ export default function Game(){
         initializeGame();
     }, []);
 
-    // movement of the bullets 
-    // useEffect(() => {
-    //     let interval_id;
-    //     if(!isGameOver && bullets.length > 0){
-    //         interval_id = setInterval(moveBullets, 10); 
-    //     }
-    //     return () => {
-    //         clearInterval(interval_id);
-    //     }
-    // }, [aliens,bullets,isGameOver,grid]) 
     const moveAliens = () => {
         const newShips = [...aliens]; 
         const currentRow = newShips[rowIndex]; 
@@ -312,7 +306,6 @@ export default function Game(){
         return () => clearInterval(bulletInterval);
     }, [isGameOver,grid,bullets]); 
 
-
   
     const showCells = () => {
         if(grid.size === 0) return;
@@ -323,6 +316,7 @@ export default function Game(){
         }
         return comps;
     }
+
 
     return(
         <SafeAreaView style={styles.container}>
