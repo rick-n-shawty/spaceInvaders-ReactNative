@@ -7,6 +7,16 @@ export class BulletClass{
         this.width = width;
         this.height = height; 
         this.dir = dir; 
+        this.color = 'red'; 
+    }
+    getDir(){
+        return this.dir;
+    }
+    setColor(colorString){
+        this.color = colorString;
+    }
+    getColor(){
+        return this.color; 
     }
     getY(){
         return this.y;

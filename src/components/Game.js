@@ -98,7 +98,6 @@ export default function Game(){
         else if(dir === Direction.RIGHT && ship.getX() + ship.getWidth() * 2 > screenWidth) return; 
         const tempShip = new ShipClass(ship.x, ship.y, ship.width, ship.height,false); 
         // let gridCopy = removeObjectFromCells(tempShip, new Map(grid)); 
-
         if(dir === Direction.LEFT){
             tempShip.setDir(Direction.LEFT); 
             tempShip.move(SHIP_SPEED); 
@@ -106,9 +105,6 @@ export default function Game(){
             tempShip.setDir(Direction.RIGHT); 
             tempShip.move(SHIP_SPEED);
         }
-
-        // gridCopy = pushObjectIntoCells(tempShip,gridCopy,{mainShip: true});
-        // setGrid(gridCopy);
         setShip(tempShip)
     }
     
@@ -121,6 +117,8 @@ export default function Game(){
         const y = shooter.getY(); 
         const dir = shooter.isAlien ? 1 : -1; 
         const bullet = new BulletClass(x,y,BULLET_WIDTH,BULLET_HEIGHT,dir);
+        const color = shooter.isAlien ? 'green' : 'red'; 
+        bullet.setColor(color);
         setBullets(prev => {
             return [...prev, bullet]; 
         });
@@ -167,13 +165,17 @@ export default function Game(){
             bullet.move(); 
             const bulletY = bullet.getY(); 
             if(!(bulletY >= 0 && bulletY <= CANVAS_HEIGHT)) continue;
-            const link = findHitShip(bullet,tempGrid); 
-            if(link){
-                const {i, j} = link;
-                isCollided = true; 
-                const shipRow = tempShips[i];
-                shipRow.splice(j,1);
-                tempShips[i] = shipRow;
+
+            if(bullet.getDir() > 0){
+            }else{
+                const link = findHitShip(bullet,tempGrid); 
+                if(link){
+                    const {i, j} = link;
+                    isCollided = true; 
+                    const shipRow = tempShips[i];
+                    shipRow.splice(j,1);
+                    tempShips[i] = shipRow;
+                }
             }
             if(!isCollided){
                 tempBullets.push(bullet); 
@@ -205,23 +207,28 @@ export default function Game(){
         let newDirection = alienDir; 
         if(alienDir === Direction.RIGHT && rowIndex < newShips.length){
             const lastShip = currentRow[currentRow.length - 1]; 
-            // check if the last ship is about to cross the border 
-            if(lastShip.getX() + lastShip.getWidth() + 10 > screenWidth && rowIndex === 0){
-                setRowIndex(rowIndex + 1); 
-                setAlienDir(Direction.DOWN);
-                setAliens(newShips); 
-                setGrid(gridCopy);  
-                return;      
-            }
+            // check if the last ship is about to cross the border
+            if(lastShip){
+                if(lastShip.getX() + lastShip.getWidth() + 10 > screenWidth && rowIndex === 0){
+                    setRowIndex(rowIndex + 1); 
+                    setAlienDir(Direction.DOWN);
+                    setAliens(newShips); 
+                    setGrid(gridCopy);  
+                    return;      
+                }
+            } 
         }else if(alienDir === Direction.LEFT && rowIndex < newShips.length){
             const firstShip = currentRow[0];
+            
             // check if the first ship is about to hit the border
-            if(firstShip.getX() - 10 < 0 && rowIndex === 0){
-                setAliens(newShips); 
-                setGrid(gridCopy); 
-                setAlienDir(Direction.DOWN); 
-                setRowIndex(rowIndex + 1); 
-                return; 
+            if(firstShip){
+                if(firstShip.getX() - 10 < 0 && rowIndex === 0){
+                    setAliens(newShips); 
+                    setGrid(gridCopy); 
+                    setAlienDir(Direction.DOWN); 
+                    setRowIndex(rowIndex + 1); 
+                    return; 
+                }
             }
         }else if(alienDir === Direction.DOWN && rowIndex < newShips.length){
             // check if we are approaching the very bottom... 
@@ -254,6 +261,20 @@ export default function Game(){
         setAlienDir(newDirection);
         setGrid(gridCopy); 
     }
+    const alienAttack = () => {
+        const firstRow = aliens[aliens.length - 1]; 
+        const randomShooter = firstRow[Math.floor(Math.random() * firstRow.length)]; 
+        if(randomShooter){
+            shoot(randomShooter);
+        }   
+    }
+    useEffect(() => { 
+        let alienAttack_interval; 
+        if(!isGameOver){
+            alienAttack_interval = setInterval(alienAttack,1000); 
+        }
+        return () => clearInterval(alienAttack_interval); 
+    }, [isGameOver]); 
     useEffect(() => {
         let alienInterval; 
         if(!isGameOver && aliens.length > 0){
@@ -271,6 +292,7 @@ export default function Game(){
     }, [isGameOver,grid,bullets]); 
 
 
+  
     const showCells = () => {
         if(grid.size === 0) return;
         const comps = [];

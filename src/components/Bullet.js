@@ -7,13 +7,9 @@ export default function Bullet({bullet}){
         <View style={
             [
                 styles.container, 
-                {left: x, top: y, backgroundColor: 'red', height, width}
+                {left: x, top: y, backgroundColor: bullet.getColor(), height, width}
             ]
         }>
-            {/* <Image
-            source={require('../../assets/images/poke-ball.jpeg')}
-            style={{height: height, width: width}}
-            /> */}
         </View>
     )
 }
